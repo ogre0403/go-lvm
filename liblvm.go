@@ -548,8 +548,8 @@ func (l *LvObject) GetProperty(name string) (properties, error) {
 }
 
 // GetSize returns size of LV.
-func (l *LvObject) GetSize() C.uint64_t {
-	return C.lvm_lv_get_size(l.Lvt)
+func (l *LvObject) GetSize() uint64 {
+	return uint64(C.lvm_lv_get_size(l.Lvt))
 }
 
 // IsActive checks active LV or not.
