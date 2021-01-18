@@ -9,6 +9,12 @@ go-lvm
 
 go-lvm is a go library to call liblvm API based on python-lvm developed in [LVM2](https://sourceware.org/lvm2/).
 
+### Install package
+```bash
+$ sudo yum install device-mapper-devel
+$ sudo yum install lvm2-devel
+```
+
 ### Usage
 
 Please refer to [go-doc](https://godoc.org/github.com/nak3/go-lvm#example-LvObject--Createremove).

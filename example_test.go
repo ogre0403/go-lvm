@@ -3,7 +3,7 @@ package lvm_test
 import (
 	"fmt"
 
-	"github.com/nak3/go-lvm"
+	"github.com/ogre0403/go-lvm"
 )
 
 // This example demonstrates creating and removing a Logical Volume(LV).
