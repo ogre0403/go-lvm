@@ -1,58 +1,43 @@
 package lvm_test
 
 import (
+	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"testing"
 
 	"github.com/ogre0403/go-lvm"
 )
 
-// This example demonstrates creating and removing a Logical Volume(LV).
-func ExampleLvObject_createremove() {
-	// List volume group
-	vglist := lvm.ListVgNames()
-	availableVG := ""
+func Test_OpenVG(t *testing.T) {
 
-	// Create a VG object
-	vgo := &lvm.VgObject{}
-	for i := 0; i < len(vglist); i++ {
-		vgo.Vgt = lvm.VgOpen(vglist[i], "r")
-		if vgo.GetFreeSize() > 0 {
-			availableVG = vglist[i]
-			vgo.Close()
-			break
-		}
-		vgo.Close()
-	}
-	if availableVG == "" {
-		fmt.Printf("no VG that has free space found\n")
+	vg, err := lvm.VgOpen("vg-aaa", "r")
+
+	if assert.Error(t, err) {
+		assert.Equal(t, errors.New(fmt.Sprintf("Volume group \"vg-aaa\" not found")), err)
 		return
 	}
 
-	// Open VG in write mode
-	vgo.Vgt = lvm.VgOpen(availableVG, "w")
+	defer vg.Close()
+}
+
+func Test_CreateLV(t *testing.T) {
+
+	vgo, err := lvm.VgOpen("vg-0", "w")
+	assert.NoError(t, err)
 	defer vgo.Close()
 
-	// Create a LV object
-	l := &lvm.LvObject{}
+	// Output some data of the VG
+	fmt.Printf("pvlist: %v\n", vgo.ListPVs())
+	fmt.Printf("free size: %4.2f %s\n", lvm.BytesToHumanReadable(vgo.GetFreeSize(), lvm.GiB), lvm.GiB)
+	fmt.Printf("size: %4.2f %s\n", lvm.BytesToHumanReadable(vgo.GetSize(), lvm.GiB), lvm.GiB)
 
 	// Create a LV
-	l, err := vgo.CreateLvLinear("go-lvm-example-test-lv", int64(vgo.GetFreeSize())/1024/1024/2)
-	if err != nil {
-		fmt.Printf("error: %v")
-		return
-	}
+	l, err := vgo.CreateLvLinear("go-lvm-example-test-lv", lvm.HumanReadableToBytes(150, lvm.MiB))
+	assert.NoError(t, err)
 
-	// Output uuid of LV
-	fmt.Printf("Created\n\tuuid: %s\n\tname: %s\n\tattr: %s\n\torigin: %s\n",
-		l.GetUuid(), l.GetName(), l.GetAttr(), l.GetOrigin())
-	// Output uuid of LV
-	l.Remove()
+	// Remove LV
+	err = l.Remove()
+	assert.NoError(t, err)
 
-	/*
-	   Created
-	   	uuid: cn631J-J2GR-DL0l-3G38-MfGm-8ypc-iHskGI
-	   	name: go-lvm-example-test-lv
-	   	attr: -wi-a-----
-	   	origin:
-	*/
 }

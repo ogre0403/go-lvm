@@ -29,12 +29,19 @@ func GC() {
 }
 
 //VgOpen opens volume group
-func VgOpen(vgname string, mode string) C.vg_t {
+func VgOpen(vgname string, mode string) (*VgObject, error) {
 	if mode == "" {
 		mode = "r"
 	}
 	vg := C.lvm_vg_open(libh, C.CString(vgname), C.CString(mode), 0)
-	return vg
+
+	if vg == nil {
+		return nil, getLastError()
+	}
+
+	return &VgObject{
+		Vgt: vg,
+	}, nil
 }
 
 //VgCreate creates VG
@@ -80,7 +87,7 @@ func ListVgNames() []string {
 	vgnames := C.lvm_list_vg_names(libh)
 	if vgnames != nil {
 		// TODO
-		fmt.Printf("nil\n")
+		//fmt.Printf("nil\n")
 	}
 	cargs := C.makeCharArray(C.int(0))
 	n := C.wrapper_dm_list_iterate_items(vgnames, cargs)
@@ -282,13 +289,13 @@ func (v *VgObject) GetSeqno() C.uint64_t {
 }
 
 // GetSize returns size of VG
-func (v *VgObject) GetSize() C.uint64_t {
-	return C.lvm_vg_get_size(v.Vgt)
+func (v *VgObject) GetSize() uint64 {
+	return uint64(C.lvm_vg_get_size(v.Vgt))
 }
 
 // GetFreeSize returns free size of VG
-func (v *VgObject) GetFreeSize() C.uint64_t {
-	return C.lvm_vg_get_free_size(v.Vgt)
+func (v *VgObject) GetFreeSize() uint64 {
+	return uint64(C.lvm_vg_get_free_size(v.Vgt))
 }
 
 // GetExtentSize returns extent size of VG.
@@ -351,7 +358,7 @@ func (v *VgObject) ListPVs() []string {
 	cargs := C.makeCharArray(C.int(0))
 	n := C.wrapper_dm_list_iterate_items(pvs, cargs)
 	gs := goStrings(n, cargs)
-	fmt.Printf("(test)pvsList: %#v\n", gs)
+	//fmt.Printf("(test)pvsList: %#v\n", gs)
 	return gs
 }
 
@@ -636,7 +643,7 @@ func (l *LvObject) Snapshot(snapname string, size uint64) (*LvObject, error) {
 // Open lists PVs and get them as string array.
 func Open() []string {
 	pvsList := C.lvm_list_pvs(libh)
-	fmt.Printf("pvsList: %#v\n", pvsList)
+	//fmt.Printf("pvsList: %#v\n", pvsList)
 
 	cargs := C.makeCharArray(C.int(0))
 	n := C.wrapper_dm_list_iterate_items(pvsList, cargs)

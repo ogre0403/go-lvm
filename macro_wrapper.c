@@ -7,7 +7,7 @@ int wrapper_dm_list_iterate_items(struct dm_list *vgnames, char **r)
 	struct lvm_str_list *strl;
 	int num = 0;
 	dm_list_iterate_items(strl, vgnames) {
-		printf("--> %s\n", strl->str);
+//		printf("--> %s\n", strl->str);
 		r[num] = (char*)strl->str;
 		num++;
 	}
