@@ -449,7 +449,7 @@ func createGoLv(v *VgObject, lv C.lv_t) *LvObject {
 }
 
 // CreateLvLinear creates LV Object.
-func (v *VgObject) CreateLvLinear(n string, s int64) (*LvObject, error) {
+func (v *VgObject) CreateLvLinear(n string, s uint64) (*LvObject, error) {
 	size := C.uint64_t(s)
 	name := C.CString(n)
 
