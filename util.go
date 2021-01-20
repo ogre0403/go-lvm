@@ -14,7 +14,7 @@ const (
 	PiB = "PiB"
 )
 
-var sizeUnit = map[string]float64{
+var SizeUnit = map[string]float64{
 	B:   1,
 	KB:  1000,                             // kilobyte
 	MB:  1000 * 1000,                      // megabyte
@@ -29,11 +29,11 @@ var sizeUnit = map[string]float64{
 }
 
 func BytesToHumanReadable(byte uint64, units string) float64 {
-	return float64(byte) / sizeUnit[units]
+	return float64(byte) / SizeUnit[units]
 }
 
 func HumanReadableToBytes(size uint64, units string) uint64 {
-	return size * uint64(sizeUnit[units])
+	return size * uint64(SizeUnit[units])
 }
 
 func UnitTranslate(size uint64, srcUnit, targetUnit string) float64 {
