@@ -62,7 +62,9 @@ func TestVgObject_CreateLvThin(t *testing.T) {
 
 	lv, err := vgo.CreateLvThin("pool0", "thin", lvm.HumanReadableToBytes(800, lvm.MiB))
 	assert.NoError(t, err)
-	assert.Equal(t, float64(800), lvm.BytesToHumanReadable(lv.GetSize(), lvm.MiB))
+	// Verify first bit of attribute is V
+	//https://www.mankier.com/8/lvs
+	assert.Equal(t, "V", string(lv.GetAttr()[0]))
 
 	err = lv.Remove()
 	assert.NoError(t, err)
