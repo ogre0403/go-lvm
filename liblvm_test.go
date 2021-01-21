@@ -54,3 +54,16 @@ func Test_GetExistingLV(t *testing.T) {
 	err = lv.Remove()
 	assert.NoError(t, err)
 }
+
+func TestVgObject_CreateLvThin(t *testing.T) {
+	vgo, err := lvm.VgOpen("vg-0", "w")
+	assert.NoError(t, err)
+	defer vgo.Close()
+
+	lv, err := vgo.CreateLvThin("pool0", "thin", lvm.HumanReadableToBytes(800, lvm.MiB))
+	assert.NoError(t, err)
+	assert.Equal(t, float64(800), lvm.BytesToHumanReadable(lv.GetSize(), lvm.MiB))
+
+	err = lv.Remove()
+	assert.NoError(t, err)
+}

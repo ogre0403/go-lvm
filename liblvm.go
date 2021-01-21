@@ -460,6 +460,26 @@ func (v *VgObject) CreateLvLinear(n string, s uint64) (*LvObject, error) {
 	return createGoLv(v, lv), nil
 }
 
+func (v *VgObject) CreateLvThin(pool_name, lvname string, size uint64) (*LvObject, error) {
+
+	CSize := C.uint64_t(size)
+	CPoolName := C.CString(pool_name)
+	CLvName := C.CString(lvname)
+
+	lv_param := C.lvm_lv_params_create_thin(v.Vgt, CPoolName, CLvName, CSize)
+
+	if lv_param == nil {
+		return nil, getLastError()
+	}
+
+	lv := C.lvm_lv_create(lv_param)
+	if lv == nil {
+		return nil, getLastError()
+	}
+
+	return createGoLv(v, lv), nil
+}
+
 //        { "createLvThinpool",   (PyCFunction)_liblvm_lvm_vg_create_lv_thinpool, METH_VARARGS },
 //        { "createLvThin",       (PyCFunction)_liblvm_lvm_vg_create_lv_thin, METH_VARARGS },
 

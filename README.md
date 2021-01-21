@@ -39,7 +39,22 @@ $ vgremove vg-0
 # Step-7. remove PV
 $ pvremove $LOOP
 ```
+### Thin provision example
+Reference: http://manpages.ubuntu.com/manpages/xenial/man7/lvmthin.7.html
 
+```bash
+# Create a LV for data of thin pool
+$ lvcreate -n pool0 -L 1G vg-0
+
+# Create a LV for metadata
+$ lvcreate -n pool0meta -L 100M vg-0
+
+# Combine the data and metadata LVs into a thin pool LV.
+$ lvconvert --type thin-pool --poolmetadata vg-0/pool0meta vg-0/pool0
+
+# Create thin LV within pool LV
+$ lvcreate -n thin1 -V 2G --thinpool vg-0/pool0
+```
 
 
 ## Test run
