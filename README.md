@@ -3,14 +3,23 @@ go-lvm
 
 ## Overview
 
-go-lvm is a go library to call lib2app API to manipulate [LVM2](https://sourceware.org/lvm2/).
+go-lvm is a go binding for [libblockdev LVM plugin](https://vpodzime.fedorapeople.org/libblockdev_doc/libblockdev-LVM.html) API to manipulate [LVM2](https://sourceware.org/lvm2/).
 
 ## Required package
-```bash
-$ sudo yum install device-mapper-devel
-$ sudo yum install lvm2-devel
-```
+* Alpine
+    ```shell
+    $ apk add libblockdev-dev lvm2
+    ```
 
+* CentOS
+    ```shell
+    $ yum groupinstall 'Development Tools'
+    $ yum install gcc make libblockdev-lvm-devel.x86_64 libblockdev-devel.x86_64
+    ```
+* Ubuntu
+   ```shell
+   $ apt-get install libblockdev-lvm-dev libblockdev-dev lvm2
+   ```
 
 ## CLI Example
 
@@ -63,12 +72,16 @@ Let's create a available volume group and create and delete a LV.
 
 ### step-1. set up a free VG
 ```bash
-sudo dd if=/dev/zero of=disk.img bs=1G count=1
-export LOOP=`sudo losetup -f`
-sudo losetup $LOOP disk.img
+$ sudo dd if=/dev/zero of=disk.img bs=1G count=1
+$ export LOOP=`sudo losetup -f`
+$ sudo losetup $LOOP disk.img
+$ pvcreate $LOOP
+$ vgcreate vg-0 $LOOP
 ```
 
-### step-2. Run an example script
+
+### step-4. Run an example script
 ```bash
-go run cmd/example.go
+$ make ctest
+$ make gtest
 ```
