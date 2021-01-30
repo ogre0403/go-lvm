@@ -24,6 +24,9 @@ func TestBD_LVM_ThLVCreate(t *testing.T) {
 	e := BD_LVM_ThLVCreate("vg-0", "pool0", "thth", HumanReadableToBytes(20, MiB))
 	assert.NoError(t, e)
 
+	v, _ := BD_LVM_LvInfo("vg-0", "thth")
+	assert.Equal(t, v.IsThinVolume(), true)
+
 	t.Cleanup(func() {
 		e := BD_LVM_LvRemove("vg-0", "thth")
 		assert.NoError(t, e)

@@ -10,6 +10,10 @@ static GError* to_error(void* err) {
 	return (GError*)err;
 }
 
+static BDLVMLVdata* to_bdlvmlvdata(void* lv){
+	return (BDLVMLVdata*)lv;
+}
+
 static inline char* to_charptr(const gchar* s) { return (char*)s; }
 
 
@@ -84,6 +88,45 @@ func BD_LVM_LvRemove(vg, lv string) error {
 		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
 	}
 	return nil
+}
+
+type BDLVData struct {
+	Lv_name string
+	Vg_name string
+	Uuid    string
+	Size    uint64
+	Attr    string
+	Segtype string
+}
+
+//BDLVMLVdata* bd_lvm_lvinfo(gchar *vg_name,
+//							 gchar *lv_name,
+//							 GError **error);
+func BD_LVM_LvInfo(vg, lv string) (*BDLVData, error) {
+	var gerror *C.GError
+
+	lvdata := C.bd_lvm_lvinfo(C.CString(vg), C.CString(lv), &gerror)
+
+	eee := gErrorFromNative(unsafe.Pointer(gerror))
+	if unsafe.Pointer(eee.GError) != nil {
+		return nil, errors.New(eee.message())
+	}
+
+	d := C.to_bdlvmlvdata(unsafe.Pointer(lvdata))
+	return &BDLVData{
+		Lv_name: C.GoString(C.to_charptr(d.lv_name)),
+		Vg_name: C.GoString(C.to_charptr(d.vg_name)),
+		Uuid:    C.GoString(C.to_charptr(d.uuid)),
+		Attr:    C.GoString(C.to_charptr(d.attr)),
+		Segtype: C.GoString(C.to_charptr(d.segtype)),
+		Size:    uint64(C.ulonglong(d.size)),
+	}, nil
+}
+
+// Verify first bit of attribute is V
+//https://www.mankier.com/8/lvs
+func (lv *BDLVData) IsThinVolume() bool {
+	return string(lv.Attr[0]) == "V"
 }
 
 type gError struct {

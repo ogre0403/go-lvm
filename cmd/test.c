@@ -120,6 +120,19 @@ int createPV2(const gchar *pv, GError **error){
 
 }
 
+int lvInfo(const gchar *vg, const gchar *lv, GError **error){
+
+    BDLVMLVdata*  lv_data = malloc(sizeof(BDLVMLVdata));
+    lv_data = NULL;
+
+    lv_data = bd_lvm_lvinfo("vg-0","ttt",error);
+
+    printf("%s\n",lv_data->attr);
+    printf("%s\n",lv_data->segtype);
+    printf("%d\n",lv_data->size);
+    printf("%s\n",lv_data->uuid);
+}
+
 int main (int argc, char *argv[]) {
 
     //init();
@@ -146,6 +159,8 @@ int main (int argc, char *argv[]) {
     if(!r){
         printf("main: %s",error->message);
     }
+
+    lvInfo("vg-0","ttt",&error);
 
     return 0;
 }
