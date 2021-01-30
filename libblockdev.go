@@ -44,9 +44,43 @@ func Initialize() error {
 	return nil
 }
 
+//gboolean bd_lvm_lvcreate(const gchar *vg_name,
+//						   const gchar *lv_name,
+//						   guint64 size,
+//						   const gchar *type,
+//						   const gchar **pv_list,
+//						   const BDExtraArg **extra,
+//						   GError **error);
 func BD_LVM_LvCreate(vg, lv string, sizeByte uint64) error {
 	var gerror *C.GError
 	if C.bd_lvm_lvcreate(C.CString(vg), C.CString(lv), C.ulong(sizeByte), C.CString("linear"), nil, nil, &gerror) == C.FALSE {
+		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
+	}
+	return nil
+}
+
+//gboolean bd_lvm_thlvcreate(const gchar *vg_name,
+//							 const gchar *pool_name,
+//							 const gchar *lv_name,
+//							 guint64 size,
+//							 const BDExtraArg **extra,
+//							 GError **error);
+func BD_LVM_ThLVCreate(vg, pool, lv string, sizeByte uint64) error {
+	var gerror *C.GError
+	if C.bd_lvm_thlvcreate(C.CString(vg), C.CString(pool), C.CString(lv), C.ulong(sizeByte), nil, &gerror) == C.FALSE {
+		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
+	}
+	return nil
+}
+
+// gboolean bd_lvm_lvremove(const gchar *vg_name,
+//                          const gchar *lv_name,
+//                          gboolean force,
+//                          const BDExtraArg **extra,
+//                          GError **error);
+func BD_LVM_LvRemove(vg, lv string) error {
+	var gerror *C.GError
+	if C.bd_lvm_lvremove(C.CString(vg), C.CString(lv), C.FALSE, nil, &gerror) == C.FALSE {
 		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
 	}
 	return nil
