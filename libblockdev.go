@@ -48,6 +48,65 @@ func Initialize() error {
 	return nil
 }
 
+//gboolean bd_lvm_pvcreate (const gchar *device,
+//							guint64 data_alignment,
+//							guint64 metadata_size,
+//							const BDExtraArg **extra,
+//							GError **error);
+func BD_LVM_PvCreate(device string) error {
+	var gerror *C.GError
+	if C.bd_lvm_pvcreate(C.CString(device), C.ulong(0), C.ulong(0), nil, &gerror) == C.FALSE {
+		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
+	}
+	return nil
+}
+
+//gboolean bd_lvm_pvremove (const gchar *device,
+//					 	    const BDExtraArg **extra,
+//				            GError **error);
+func BD_LVM_PvRemove(device string) error {
+	var gerror *C.GError
+	if C.bd_lvm_pvremove(C.CString(device), nil, &gerror) == C.FALSE {
+		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
+	}
+	return nil
+}
+
+//gboolean bd_lvm_vgcreate (const gchar *name,
+//							const gchar **pv_list,
+//							guint64 pe_size,
+//							const BDExtraArg **extra,
+//							GError **error);
+func BD_LVM_VgCreate(vg string, pvs []string) error {
+	// convert pv string slice to gchar**
+	// https://developer.aliyun.com/article/481791
+	pv_list := make([]*C.char, 0)
+	for i, _ := range pvs {
+		char := C.CString(pvs[i])
+		defer C.free(unsafe.Pointer(char))
+		strptr := (*C.char)(unsafe.Pointer(char))
+		pv_list = append(pv_list, strptr)
+	}
+
+
+	var gerror *C.GError
+	if C.bd_lvm_vgcreate(C.CString(vg), (**C.char)(unsafe.Pointer(&pv_list[0])), C.ulong(0), nil, &gerror) == C.FALSE {
+		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
+	}
+	return nil
+}
+
+//gboolean bd_lvm_vgremove (const gchar *vg_name,
+//							const BDExtraArg **extra,
+//							GError **error);
+func BD_LVM_VgRemove(vg string) error {
+	var gerror *C.GError
+	if C.bd_lvm_vgremove(C.CString(vg), nil, &gerror) == C.FALSE {
+		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
+	}
+	return nil
+}
+
 //gboolean bd_lvm_lvcreate(const gchar *vg_name,
 //						   const gchar *lv_name,
 //						   guint64 size,
@@ -69,7 +128,7 @@ func BD_LVM_LvCreate(vg, lv string, sizeByte uint64) error {
 //							 guint64 size,
 //							 const BDExtraArg **extra,
 //							 GError **error);
-func BD_LVM_ThLVCreate(vg, pool, lv string, sizeByte uint64) error {
+func BD_LVM_ThLvCreate(vg, pool, lv string, sizeByte uint64) error {
 	var gerror *C.GError
 	if C.bd_lvm_thlvcreate(C.CString(vg), C.CString(pool), C.CString(lv), C.ulong(sizeByte), nil, &gerror) == C.FALSE {
 		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
