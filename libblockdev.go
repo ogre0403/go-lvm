@@ -88,7 +88,6 @@ func BD_LVM_VgCreate(vg string, pvs []string) error {
 		pv_list = append(pv_list, strptr)
 	}
 
-
 	var gerror *C.GError
 	if C.bd_lvm_vgcreate(C.CString(vg), (**C.char)(unsafe.Pointer(&pv_list[0])), C.ulong(0), nil, &gerror) == C.FALSE {
 		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
@@ -186,6 +185,22 @@ func BD_LVM_LvInfo(vg, lv string) (*BDLVData, error) {
 //https://www.mankier.com/8/lvs
 func (lv *BDLVData) IsThinVolume() bool {
 	return string(lv.Attr[0]) == "V"
+}
+
+//gboolean bd_lvm_thpoolcreate (const gchar *vg_name,
+//								const gchar *lv_name,
+//								guint64 size,
+//								guint64 md_size,
+//								guint64 chunk_size,
+//								const gchar *profile,
+//								const BDExtraArg **extra,
+//								GError **error);
+func BD_LVM_ThPoolCreate(vg, lv string, sizeByte uint64) error {
+	var gerror *C.GError
+	if C.bd_lvm_thpoolcreate(C.CString(vg), C.CString(lv), C.ulong(sizeByte), C.ulong(0), C.ulong(0), nil, nil, &gerror) == C.FALSE {
+		return errors.New(strings.TrimSpace(gErrorFromNative(unsafe.Pointer(gerror)).message()))
+	}
+	return nil
 }
 
 type gError struct {
